@@ -16,6 +16,7 @@ FROM ANTIQUARIATO;
 
 -- 4) Trova l'ID asta, il prezzo base e la data di inizio di tutte le aste presenti nella tabella "ASTA":
 
+
 -- 5) Ottieni il login, il nome e il cognome di tutti gli utenti presenti nella tabella "UTENTE":
 
 -- 6) Recupera l'ID asta, il login e il prezzo di rilancio di tutte le partecipazioni rilanciate presenti nella tabella "RILANCIATA":
