@@ -9,6 +9,3 @@ SELECT		I.nome, COUNT(L.numero_progetto) AS numero_di_progetti
 FROM		IMPIEGATO I JOIN LAVORA_SU L ON I.cf = L.cf_impiegato
 GROUP BY 	I.nome
 HAVING 		COUNT(L.numero_progetto) > 1;
-
-
-
