@@ -31,7 +31,7 @@ END;
 
 ------------
 CREATE OR REPLACE TRIGGER InterventiMedici 
-BEFORE INSERT ON INTERVENTO
+BEFORE INSERT ON EFFETTUA
 FOR EACH ROW
 DECLARE
     totInterv   NUMBER;
@@ -43,7 +43,7 @@ BEGIN
     SELECT  COUNT(*)
     INTO    totInterv
     FROM    EFFETTUA
-    WHERE  	cf_med = codfMedico;
+    WHERE  	cf_med =:NEW.cf_med;
 
     IF(totInterv > 6 )THEN
         RAISE_APPLICATION_ERROR(-2001,'MaxInterventi: Attenzione questo medico ha effettuato gia 10 interventi');
