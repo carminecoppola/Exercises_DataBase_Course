@@ -4,8 +4,6 @@
         dipartimento_incompatibile, sede_incompatibile.
 */
 
-
-
 CREATE OR REPLACE TRIGGER ControlloDipartimento BEFORE INSERT ON PROGETTO
 FOR EACH ROW
 DECLARE
@@ -17,31 +15,28 @@ BEGIN
     SELECT  dipartimento_responsabile 
     INTO    dip_provenienza
     FROM    PROGETTO P
-    WHERE   P.numero_progetto :=NEW.numero_progetto;
+    WHERE   P.numero_progetto = :NEW.numero_progetto;
 
-    SELECT  numero_dipartimento
+    SELECT  NUMERO_DIPARTIMENTO
     INTO    dip_assegnato
     FROM    IMPIEGATO I
-    WHERE   I.cf =:NEW.cf_impiegato;
-
+    WHERE   I.CF = (SELECT CF_IMPIEGATO FROM LAVORA_SU WHERE NUMERO_PROGETTO = :NEW.NUMERO_PROGETTO);
 
     IF(dip_provenienza <> dip_assegnato) THEN 
-        RAISE_APPLICATION_ERROR(-3000, 'dipartimento_incompatibile: errore in fase di assrgnazione del dipartimento');
+        RAISE_APPLICATION_ERROR(-3000, 'dipartimento_incompatibile: errore in fase di assegnazione del dipartimento');
     END IF;
 
-
-    SELECT  sede_progetto 
+    SELECT  SEDE_PROGETTO 
     INTO    sede_dipartimento
     FROM    PROGETTO P
-    WHERE   P.numero_progetto := NEW.numero_progetto;
+    WHERE   P.NUMERO_PROGETTO = :NEW.NUMERO_PROGETTO;
 
-    SELECT  DISTINCT(citta_sede)
+    SELECT  DISTINCT(CITTA_SEDE)
     INTO    sede_assegnazione
-    FROM    PROGETTO P JOIN LAVORA_SU LS ON(P.numero_progetto = LS.numero_progetto)
-    WHERE   dip_provenienza = dip_assegnato and cf_impiegato=:NEW.cf_impiegato;
-
+    FROM    SEDE_DIPARTIMENTO SD
+    WHERE   SD.NUMERO_DIPARTIMENTO = dip_assegnato;
 
     IF(sede_assegnazione <> sede_dipartimento) THEN 
-        RAISE_APPLICATION_ERROR(-3001, 'sede_incompatibile: errore in fase di assrgnazione del dipartimento');
+        RAISE_APPLICATION_ERROR(-3001, 'sede_incompatibile: errore in fase di assegnazione del dipartimento');
     END IF;
 END;
