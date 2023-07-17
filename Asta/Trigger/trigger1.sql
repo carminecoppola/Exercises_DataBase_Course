@@ -5,7 +5,6 @@
         rilancio_minimo_troppo_basso, asta_troppo_breve, oggetto_troppe_volte_in_vendita. 
 */
 
-
 CREATE OR REPLACE TRIGGER ControlloAsta BEFORE INSERT ON ASTA
 FOR EACH ROW
 DECLARE
