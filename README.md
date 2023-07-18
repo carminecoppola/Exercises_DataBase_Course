@@ -5,19 +5,23 @@ Welcome to the repository containing exercises for the Databases course. This re
 # Repository Structure
 
 The repository is organized as follows:
-
-1) Asta: Contains the auction-related database.
-    - Populating: This folder contains SQL scripts to populate the database with sample data.
-    - Query: This folder contains exercises where you need to write SQL queries to solve them.
-    - Solutions: This folder contains the solutions to the exercises.
-2) Azienda: Contains the company-related database.
-    - Populating: This folder contains SQL scripts to populate the database with sample data.
-    - Query: This folder contains exercises where you need to write SQL queries to solve them.
-    - Solutions: This folder contains the solutions to the exercises.
-3) Ospedale: Contains the hospital-related database.
-    - Populating: This folder contains SQL scripts to populate the database with sample data.
-    - Query: This folder contains exercises where you need to write SQL queries to solve them.
-    - Solutions: This folder contains the solutions to the exercises.
+- ER-Diagrams: Contains the ER diagrams for the three sample databases.
+- Coding: Contains the SQL code for the queries and triggers in the three sample databases.
+    1) Asta Database: Contains the auction-related database.
+        - Populating: This folder contains SQL scripts to populate the database with sample data.
+        - Query: This folder contains exercises where you need to write SQL queries to solve them.
+        - Trigger: Contains SQL triggers that are executed when certain events occur in the database.
+        - Solutions: This folder contains the solutions to the exercises.
+    2) Azienda Database: Contains the company-related database.
+        - Populating: This folder contains SQL scripts to populate the database with sample data.
+        - Query: This folder contains exercises where you need to write SQL queries to solve them.
+        - Trigger: Contains SQL triggers that are executed when certain events occur in the database.
+        - Solutions: This folder contains the solutions to the exercises.
+    3) Ospedale Database: Contains the hospital-related database.
+        - Populating: This folder contains SQL scripts to populate the database with sample data.
+        - Query: This folder contains exercises where you need to write SQL queries to solve them.
+        - Trigger: Contains SQL triggers that are executed when certain events occur in the database.
+        - Solutions: This folder contains the solutions to the exercises.
 # Instructions
 
 To prepare for the written exam, please follow these steps:
