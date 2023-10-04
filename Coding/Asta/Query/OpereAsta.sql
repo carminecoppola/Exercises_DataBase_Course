@@ -7,10 +7,15 @@ FROM    OPERA_D_ARTE OP JOIN OGGETTO O ON OP.codice_oggetto = O.codice_oggetto
 WHERE   O.codice_oggetto NOT IN (SELECT codice_oggetto FROM ASTA)
 GROUP BY OP.autore, OP.tipo;
 
+-- no data found
 
---NON LO SO
-SELECT  OP.autore, OP.tipo
-FROM    OPERA_D_ARTE OP JOIN OGGETTO O ON OP.codice_oggetto = O.codice_oggetto
-                        JOIN ASTA A ON O.codice_oggetto = A.codice_oggetto
-WHERE   A.codice_oggetto IS NULL
-GROUP BY OP.autore, OP.tipo;
+--select  autore,tipo,codice_oggetto
+--from    opera_d_arte;
+--select  codice_oggetto
+--from    asta;
+
+--GIUSTA
+SELECT   OA.autore, OA.tipo
+FROM	   OGGETTO O JOIN OPERA_D_ARTE OA ON (O.codice_oggetto = OA.codice_oggetto)
+WHERE	   O.codice_oggetto NOT IN (SELECT  A.codice_oggetto FROM  ASTA A);
+

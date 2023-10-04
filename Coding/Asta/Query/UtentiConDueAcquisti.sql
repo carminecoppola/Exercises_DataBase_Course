@@ -10,3 +10,13 @@ GROUP BY V.CF, U.nome                                        -- Filtra solo gli 
 
 -- NB: NON darà output con questo popolamento
 
+
+select u.nome
+from
+    (	select distinct v.cf, v.id_asta,v.prezzo_finale
+    	from vendita v join asta a on (a.id_asta = v.id_asta)
+    	group by v.cf, v.id_asta,v.prezzo_finale
+    	having count(*) > 1
+    )t  join rilanciata r on t.id_asta = r.id_asta
+    	join utente u on r.login = u.login
+where (v.prezzo_finale = r.prezzo_rilancio);

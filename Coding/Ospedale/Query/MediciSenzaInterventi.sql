@@ -2,10 +2,11 @@
     nell'ultima settimana (si considera l'ora di sistema come riferimento). */
 
 
-SELECT	P.nome, P.cognome
-FROM	PERSONA P JOIN MEDICO M ON(P.cf = M.cf)
-				  JOIN EFFETTUA E ON(M.cf = E.cf_med)
-				  JOIN INTERVENTO I ON(E.id_int = I.id)
-WHERE	(SYSDATE - I.data_e_ora) > 7;           -- Seleziona solo i medici che non hanno effettuato interventi nell'ultima settimana
+SELECT 	 P.nome, P.cognome, M.specializzazione as medico, IT.data_e_ora
+FROM	 persona P JOIN medico M ON (P.cf = M.cf)
+				  JOIN effettua E ON(M.cf = E.cf_med)
+				  JOIN intervento IT ON (E.id_int = IT.id)
+where	 IT.data_e_ora IS NULL OR IT.data_e_ora < SYSDATE - 7
+order by IT.data_e_ora DESC;
 
 -- N.B: Controllare se va bene la questione della DATA
