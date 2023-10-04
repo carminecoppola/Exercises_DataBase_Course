@@ -6,7 +6,7 @@ FROM	PERSONA P JOIN PAZIENTE PZ ON(P.cf = PZ.cf)
 				  JOIN INTERVENTO I ON(P.cf = I.cf_paz)
 WHERE	I.tipo = 'LASER' OR I.tipo = 'CHIRURGIA GENERALE';
 
---Altro Modo
+--GIUSTA
 SELECT 	DISTINCT(P.cf), P.data_nascita
 FROM	Persona P JOIN PAZIENTE PZ ON(P.cf = PZ.cf)
 				  JOIN INTERVENTO I ON(P.cf = I.cf_paz)

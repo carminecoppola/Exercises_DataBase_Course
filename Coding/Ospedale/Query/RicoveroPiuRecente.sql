@@ -1,12 +1,14 @@
 /*  Per ogni sala operatoria, visualizzare la data di ricovero dell'ultima persona che si
     è operata in quella sala e il numero complessivo di interventi in essa effettuati   */
 
-SELECT V.sala_op, P.data_ric, V.totale_operazioni
-FROM INTERVENTO I JOIN ( SELECT sala_op, MAX(data_e_ora) AS LAST_OP_DATE, COUNT(*) AS totale_operazioni
-                         FROM INTERVENTO
-                         GROUP BY sala_op
-                    	)V ON (I.data_e_ora = V.LAST_OP_DATE AND I.sala_op = V.sala_op)
-						JOIN PAZIENTE P ON I.cf_paz = P.cf;
+select	i.sala_op, subq.num_int_sala, pz.cf, pz.data_ric, i.data_e_ora
+from	intervento i join 
+		(
+    		select	i.sala_op, max(i.data_e_ora) as maxdata, count(*) as num_int_sala
+    		from 	intervento i
+    		group by i.sala_op
+        )subq on (subq.maxdata = i.data_e_ora and subq.sala_op = i.sala_op)
+        JOIN PAZIENTE PZ ON I.cf_paz = PZ.cf;
 
 
 -- Sottoquery per ottenere la sala operatoria, la data di ricovero più recente e il totale degli interventi per ciascuna sala
