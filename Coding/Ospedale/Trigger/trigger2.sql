@@ -49,3 +49,48 @@ END;
 2)  INSERT INTO INTERVENTO (ID, TIPO, DATA_E_ORA, DURATA, SALA_OP, CF_PAZ)
     VALUES (210, 'CHIRURGIA PLASTICA', TO_DATE('2023-07-11 10:00:00', 'YYYY-MM-DD HH24:MI:SS'), 6, 'SALA DUE', 'AAA0000000000002');
 */
+
+
+
+
+create or replace trigger controllopaziente before insert on intervento
+for each row
+declare
+	num_int_mese			number(2,0);
+	num_tip_div				number(2,0);
+    
+    too_frequent			EXCEPTION;
+	time_interval_too_short	EXCEPTION;
+	already_done			EXCEPTION;
+
+begin
+	select	count(i.id)
+    into	num_int_mese
+    from	intervento i join persona p on i.cf_paz = p.cf
+    					 join paziente pz on p.cf = pz.cf
+    where	(i.id =:NEW.id and i.data_e_ora >= SYSDATE - 31);
+
+
+    IF num_int_mese > 2 THEN
+    	RAISE too_frequent;
+	END IF;
+
+
+	select	count(i.tipo)
+    into	num_tip_div
+    from	intervento i join persona p on i.cf_paz = p.cf
+    					 join paziente pz on p.cf = pz.cf
+	where	(i.tipo =:NEW.tipo and i.id =:NEW.id);
+
+    IF num_tip_div > 1 THEN
+    	RAISE already_done;
+	END IF;
+        
+
+    EXCEPTION
+    	WHEN too_frequent THEN
+    		RAISE_APPLICATION_ERROR('-20001','too_frequent: il paziente ha gia effettuato 2 interventi questo mese');
+		WHEN already_done THEN
+    		RAISE_APPLICATION_ERROR('-20002','already_done: il paziente ha gia effettuato gia un intervento di questo tipo');
+end;
+
