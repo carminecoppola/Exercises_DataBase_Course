@@ -5,15 +5,6 @@
         oggetto_già_venduto, periodo_trascorso_dall_ultima_asta_troppo_breve, oggetto_non_valido
 */
 
-
-/*  Un oggetto non può essere rimesso all'asta se è stato già venduto oppure se non è passata
-    più di una settimana dall'ultima volta che è stato messo all'asta rimanendo invenduto.
-    Gli oggetti di provenienza 'LOUVRE' non possono andare all'asta.
-    Eccezioni: 
-        oggetto_già_venduto, periodo_trascorso_dall_ultima_asta_troppo_breve, oggetto_non_valido
-*/
-
-
 CREATE OR REPLACE TRIGGER ControlloOggetti BEFORE INSERT ON ASTA
 FOR EACH ROW
 DECLARE
@@ -58,3 +49,70 @@ INSERT INTO ASTA(ID_ASTA, RILANCIO_MIN, PREZZO_BASE, DATA_INIZIO, DATA_FINE, COD
 
 
 
+
+
+
+/*  Un oggetto non può essere rimesso all'asta se è stato già venduto oppure se non è passata
+    più di una settimana dall'ultima volta che è stato messo all'asta rimanendo invenduto.
+    Gli oggetti di provenienza 'LOUVRE' non possono andare all'asta.
+    Eccezioni: 
+        oggetto_gia_venduto, periodo_trascorso_dall_ultima_asta_troppo_breve, oggetto_non_valido
+*/
+
+
+
+create or replace trigger controlloOggetti before insert on asta
+for each row
+declare 
+
+	oggetto_venduto		number;
+	poco_tempo			number;
+	oggetto_louvre		number;
+    
+	oggetto_gia_venduto				 EXCEPTION;
+	periodo_trasc_ultima_asta_breve  EXCEPTION;
+	oggetto_non_valido				 EXCEPTION;
+
+
+begin
+
+    select 	count(*)
+    into	oggetto_venduto
+    from 	asta a join vendita v on a.id_asta = v.id_asta
+	where	a.id_asta =:NEW.id_asta;
+
+	select 	count(*)
+    into	poco_tempo
+    from 	asta a join vendita v on a.id_asta = v.id_asta
+	where	a.codice_oggetto =:NEW.codice_oggetto and a.data_fine >= SYSDATE - 7;
+
+	select	count(*)
+    into	oggetto_louvre
+    from 	asta a join ( select 	o.codice_oggetto, o.provenienza
+        			   	  from		oggetto o 
+        			      where		o.provenienza = 'LOUVRE'
+    				    )subq on a.codice_oggetto = subq.codice_oggetto;
+
+
+	if oggetto_venduto > 0 then
+    	raise oggetto_gia_venduto;
+	end if;
+
+	if poco_tempo > 0 then
+    	raise periodo_trasc_ultima_asta_breve;
+	end if;
+
+    if oggetto_louvre > 0 then
+        	raise oggetto_non_valido;
+	end if;
+
+        
+	exception
+        when oggetto_gia_venduto then
+        	raise_application_error('-20001','oggetto_gia_venduto: asta di questo oggetto è gia terminata');
+		when periodo_trasc_ultima_asta_breve then
+            raise_application_error('-20002','periodo_trasc_ultima_asta_breve: oggetto messo all asta prima di una settimana');
+		when oggetto_non_valido then
+            raise_application_error('-20003','oggetto_non_valido: oggetto proveniente da louvre');
+
+end; 
