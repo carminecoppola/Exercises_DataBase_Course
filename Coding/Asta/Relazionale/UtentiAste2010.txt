@@ -16,3 +16,5 @@ where   extract(YEAR FROM a.data_inizio) = '2010';
 σ(YEAR(a.data_inizio)) = '2010'
 
 
+π_{u.nome,u.cognome}( (σ(YEAR(a.data_inizio)) = '2010') Utente (u) ⋈ Rilanciata (r) ⋈ Asta(a) ⋈ Vendita(v))
+

@@ -1,4 +1,4 @@
-/*  2) Trovare il nome e il CF di tutti gli utenti che hanno 
+/*  2 Trovare il nome e il CF di tutti gli utenti che hanno 
        effettuato più di due acquisti */
 
 ρ Numero_Acquisti (COUNT(*) ⨝ (Utente(u) ⨝ (u.login = r.login) Rilanciata(r) 
