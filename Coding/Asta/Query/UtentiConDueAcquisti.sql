@@ -1,4 +1,5 @@
-/*  2) Trovare il nome e il CF di tutti gli utenti che hanno effettuato più di due acquisti */
+/*  2) Trovare il nome e il CF di tutti gli utenti che hanno 
+       effettuato più di due acquisti */
 
 SELECT  U.nome, V.CF
 FROM    UTENTE U JOIN RILANCIATA R ON U.login = R.login
@@ -20,3 +21,4 @@ from
     )t  join rilanciata r on t.id_asta = r.id_asta
     	join utente u on r.login = u.login
 where (v.prezzo_finale = r.prezzo_rilancio);
+

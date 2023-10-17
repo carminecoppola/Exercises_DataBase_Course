@@ -14,3 +14,5 @@ where   extract(YEAR FROM a.data_inizio) = '2010';
                                 ⋈ (a.id_asta = u.id_asta)Vendita(v)
                     )
 σ(YEAR(a.data_inizio)) = '2010'
+
+
