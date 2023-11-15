@@ -9,3 +9,4 @@
 σ Numero_Acquisti > 2 (Numero_Acquisti)
 
 
+ 

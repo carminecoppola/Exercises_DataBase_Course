@@ -1,0 +1,14 @@
+ /* Visualizzare CF, nome e cognome di tutti gli infermieri che hanno alemno 
+    un collega dello stesso sesso e della stessa età */
+ 
+    π nome,cognome,cf (
+    σ p1.data_nascita = p2.data_nascita and p1.sesso = p2.sesso 
+        (Persona ⨝ Infermiere)
+    )
+
+
+- Commento:
+        Ho provato a inserire la condizione giusta ovvero 
+        il confronto tra prima e seconda persona, ovvero 
+        se il sesso e la data di nascita sono uguali.
+        Le tabelle credo basti il JOIN tra Persona e Infermiere
