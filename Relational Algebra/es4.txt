@@ -1,0 +1,8 @@
+/* Seleziona tutti i PC con un prezzo inferiore a 1000 dollari*/
+
+π model,type,price (σ price < 1000(Product ⨝ PC))
+
+
+Commento:
+Selezino la marca il modello è il tipo di pc che hanno un prezzo inferiore a 1000
+Corretta sintatticamente con il DB integrato su RelaX

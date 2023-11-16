@@ -1,0 +1,3 @@
+/* Trova i modelli dei laptop con un prezzo inferiore a 1500 dollari e uno schermo più grande di 14 pollici*/
+
+π model,price,screen(σ price < 1500 and screen > 14(Laptop))

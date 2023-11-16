@@ -1,0 +1,3 @@
+Trova gli autori di libri consigliati per il corso con CourseId 303 nel trimestre "Summer":
+
+π Author,Book_Title (σ CourseId = 303 and Quarter = 'Summer'(BOOK ⨝ BOOK_RECOMMENDATION ⨝ ENROLL))

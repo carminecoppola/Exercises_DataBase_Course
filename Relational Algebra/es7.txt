@@ -1,0 +1,3 @@
+/*Trova il nome degli studenti che si sono iscritti al corso "OOP1" nel semestre invernale 2020*/
+
+π Name,CourseId (σ Cname = 'OOP1' ∧ Quarter = 'WiSe2020'(ENROLL ⨝ STUDENT ⨝ COURSE))

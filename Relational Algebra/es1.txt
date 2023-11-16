@@ -1,0 +1,2 @@
+Traccia:
+Trovare gli order_id di tutti gli ordini che includono almeno 2 prodotti diversi
