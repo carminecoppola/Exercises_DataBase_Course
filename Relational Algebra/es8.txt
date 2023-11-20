@@ -1,0 +1,3 @@
+/*Trova tutti i film del genere 'Drama' usciti dopo il 2000. Mostra il nome del film e l'anno di uscita.*/
+
+π name,year (σ genre = 'Drama' ∧ year > 2000(movies ⨝ movies_genres))
