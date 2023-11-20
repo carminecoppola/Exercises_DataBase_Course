@@ -1,44 +1,49 @@
-/*  La durata di un'asta non può essere inferiore a tre giorni. 
+ /*  La durata di un'asta non può essere inferiore a tre giorni. 
     In un mese un oggetto non può essere messo all'asta più di tre volte. 
     Il rilancio minimo dev'essere almeno il 10% del prezzo base. 
     Eccezioni: 
         rilancio_minimo_troppo_basso, asta_troppo_breve, oggetto_troppe_volte_in_vendita. 
 */
 
-CREATE OR REPLACE TRIGGER AST BEFORE INSERT ON ASTA
+
+CREATE OR REPLACE TRIGGER ControlloAsta BEFORE INSERT ON ASTA
 FOR EACH ROW
 DECLARE
-
-CONT_VOLTE          NUMBER(2,0);
-TOO_SHORT_DURATION  EXCEPTION;
-TOO_MANY_TIMES      EXCEPTION;
-TOO_LOW             EXCEPTION;
+num_volte_asta	NUMBER;
+rilancio_min	EXCEPTION;
+a_breve 		EXCEPTION;
+ogg_vendita 	EXCEPTION;
 
 BEGIN
 
-IF TO_DATE(:NEW.DATA_INIZIO, 'YYYY-DD-MM') - TO_DATE(:NEW.DATA_FINE, 'YYYY-DD-MM') < 3 THEN
-	RAISE TOO_SHORT_DURATION;
-END IF;
+	-- La durata di un'asta non può essere inferiore a tre giorni. 
 
-SELECT COUNT(*) INTO CONT_VOLTE
-FROM ASTA
-WHERE CODICE_OGGETTO=:NEW.CODICE_OGGETTO AND TO_DATE(DATA_INIZIO, 'MM')=TO_DATE(:NEW.DATA_INIZIO, 'MM');
+    	IF (TO_DATE(:NEW.data_fine,'YYYY-DD-MM') - TO_DATE(:NEW.data_inizio,'YYYY-DD-MM') < 3) THEN
+    		raise a_breve;
+		END IF;
 
-IF CONT_VOLTE>3 THEN
-	RAISE TOO_MANY_TIMES;
-END IF;
+    -- In un mese un oggetto non può essere messo all'asta più di tre volte.
 
-IF :NEW.RILANCIO_MIN < 0.10*:NEW.PREZZO_BASE THEN
-	RAISE TOO_LOW;
-END IF;
+    	SELECT 	COUNT(*)
+    	INTO	num_volte_asta
+    	FROM	ASTA 
+    	WHERE	codice_oggetto =:NEW.codice_oggetto and TO_DATE(data_inizio,'MM') = TO_DATE(:NEW.data_inizio,'MM');
 
-EXCEPTION
-    WHEN TOO_SHORT_DURATION THEN
-        RAISE_APPLICATION_ERROR(-20003, 'TROPPE VOLTE');
+    	IF num_volte_asta > 3 THEN
+    		raise ogg_vendita;
+		END IF;
 
-    WHEN TOO_MANY_TIMES THEN
-        RAISE_APPLICATION_ERROR(-20002, 'TROPPE VOLTE');
+    -- Il rilancio minimo dev'essere almeno il 10% del prezzo base:
 
-    WHEN TOO_LOW THEN
-        RAISE_APPLICATION_ERROR(-20001, 'ERRORE');
+        IF ((:NEW.rilancio_min) < (:NEW.prezzo_base * 10)/100) THEN
+            raise rilancio_min;
+		END IF;
+
+    EXCEPTION
+    	WHEN rilancio_min THEN
+    		RAISE_APPLICATION_ERROR('-20001','rilancio_minimo_troppo_basso: ');
+		WHEN a_breve THEN
+    		RAISE_APPLICATION_ERROR('-20002','asta_troppo_breve: ');
+		WHEN ogg_vendita THEN
+    		RAISE_APPLICATION_ERROR('-20003','oggetto_troppe_volte_in_vendita: ');
 END;
