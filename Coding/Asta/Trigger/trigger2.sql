@@ -5,51 +5,70 @@
         oggetto_già_venduto, periodo_trascorso_dall_ultima_asta_troppo_breve, oggetto_non_valido
 */
 
-CREATE OR REPLACE TRIGGER ControlloOggetti BEFORE INSERT ON ASTA
+
+CREATE OR REPLACE TRIGGER ControlloAsta BEFORE INSERT ON Asta
 FOR EACH ROW
 DECLARE
-    prov 		VARCHAR2(40);
-	lastAsta 	DATE;
-    currentDate DATE := SYSDATE;
+
+ogg_vend		NUMBER;
+poco_tempo		NUMBER;
+prov_ogg		CHAR;
+
+oggetto_gia_venduto    							   EXCEPTION;
+periodo_trascorso_dall_ultima_asta_troppo_breve    EXCEPTION;
+oggetto_non_valido    							   EXCEPTION;
 BEGIN
 
-    -- Controllo provenienza
-    SELECT O.provenienza
-    INTO prov
-    FROM ASTA A JOIN OGGETTO O ON (A.codice_oggetto = O.codice_oggetto)
-    WHERE A.codice_oggetto = :NEW.codice_oggetto;
+	-- Un oggetto non può essere rimesso all'asta se è stato già venduto
 
-    IF prov = 'LOUVRE' THEN
-        RAISE_APPLICATION_ERROR(-3000, 'oggetto_non_valido: gli oggetti di provenienza LOUVRE non possono andare all asta');
-    END IF;
+    	SELECT	COUNT(*)
+        INTO	ogg_vend
+        FROM	ASTA A JOIN VENDITA V ON A.id_asta = V.id_asta 
+    				   JOIN OGGETTO O ON A.codice_oggetto = O.codice_oggetto
+        WHERE	A.codice_oggetto =:NEW.codice_oggetto;
 
-	-- Controllo oggetto già venduto
-    SELECT	MAX(DATA_RICEZ_PAG)
-    INTO 	lastAsta
-    FROM 	VENDITA
-    WHERE 	ID_ASTA = :NEW.codice_oggetto;
+		IF	ogg_vend >= 1 THEN
+            RAISE oggetto_gia_venduto;
+		END IF;
+    
+    
+    -- oppure se non è passata più di una settimana dall'ultima volta che è stato messo all'asta rimanendo invenduto.
 
-    IF lastAsta IS NOT NULL THEN
-        RAISE_APPLICATION_ERROR(-3001, 'oggetto_già_venduto: l''oggetto è stato già venduto');
-    END IF;
+		SELECT	COUNT(*)
+        INTO	poco_tempo
+        FROM	ASTA 
+        WHERE	codice_oggetto =:NEW.codice_oggetto AND data_fine >:NEW.data_inizio - 7;
 
-    -- Controllo periodo trascorso dall'ultima asta
-    IF lastAsta IS NOT NULL AND currentDate - lastAsta < 7 THEN
-        RAISE_APPLICATION_ERROR(-3002, 'periodo_trascorso_dall_ultima_asta_troppo_breve: non è passata una settimana dall''ultima asta');
-    END IF;
-	
+		IF	poco_tempo >= 1 THEN
+            RAISE periodo_trascorso_dall_ultima_asta_troppo_breve;
+		END IF;
+    
+	-- Gli oggetti di provenienza 'LOUVRE' non possono andare all'asta.
 
+    	SELECT 	O.provenienza
+    	INTO 	prov_ogg
+    	FROM	Asta A JOIN Oggetto O ON (A.codice_oggetto =  O.codice_oggetto)
+        WHERE	O.codice_oggetto =:NEW.codice_oggetto;
+
+
+    	IF (prov_ogg = 'LOUVRE') THEN
+    		RAISE oggetto_non_valido;
+		END IF;
+
+
+	EXCEPTION
+        WHEN oggetto_gia_venduto THEN
+	        RAISE_APPLICATION_ERROR('-20001','oggetto_gia_venduto:');
+		 WHEN periodo_trascorso_dall_ultima_asta_troppo_breve THEN
+	        RAISE_APPLICATION_ERROR('-20002','periodo_trascorso_dall_ultima_asta_troppo_breve:');
+		 WHEN oggetto_non_valido THEN
+	        RAISE_APPLICATION_ERROR('-20003','oggetto_non_valido:');
+		
+    
 END;
 
 
--- Primo inserimento per il LOUVRE
-INSERT INTO ASTA(ID_ASTA, RILANCIO_MIN, PREZZO_BASE, DATA_INIZIO, DATA_FINE, CODICE_OGGETTO) VALUES
-('A000000022', 6000, 24000, to_date('01-02-2019 10:00','dd-mm-yyyy hh24:mi'),to_date('01-04-2019 18:00','dd-mm-yyyy hh24:mi'),'1000000010');
-
-
-
-
-
+-- Altra Prova Ma credo Sbagliata
 
 
 /*  Un oggetto non può essere rimesso all'asta se è stato già venduto oppure se non è passata
@@ -58,8 +77,6 @@ INSERT INTO ASTA(ID_ASTA, RILANCIO_MIN, PREZZO_BASE, DATA_INIZIO, DATA_FINE, COD
     Eccezioni: 
         oggetto_gia_venduto, periodo_trascorso_dall_ultima_asta_troppo_breve, oggetto_non_valido
 */
-
-
 
 create or replace trigger controlloOggetti before insert on asta
 for each row
@@ -116,3 +133,4 @@ begin
             raise_application_error('-20003','oggetto_non_valido: oggetto proveniente da louvre');
 
 end; 
+
