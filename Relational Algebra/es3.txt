@@ -1,2 +1,0 @@
-Traccia:
-Mostrare tutti gli id degli ordini che sono stati curati da un manager.

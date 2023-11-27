@@ -1,2 +1,0 @@
-Traccia:
-Trovare nome e cognome di tutti i manager
