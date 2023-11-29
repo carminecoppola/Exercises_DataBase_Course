@@ -2,7 +2,7 @@
        che sono stati all'asta almeno una volta nel mese di gennaio 
        (di qualsiasi anno)  */
 
-SELECT 	 O.codice_oggetto, O.provenienza, A.data_inizio
+SELECT  O.codice_oggetto, O.provenienza, A.data_inizio
 FROM	 OGGETTO O JOIN ASTA A ON(O.codice_oggetto = a.codice_oggetto)
     	 		   JOIN VENDITA V ON(a.id_asta = v.id_asta)
 WHERE	 EXTRACT(MONTH FROM A.data_inizio) = 1
