@@ -1,0 +1,7 @@
+-- Trova tutti gli interventi (ID, TIPO, DATA_E_ORA) che sono stati eseguiti da infermieri con una specifica qualifica (ad esempio, "Specializzato")
+
+π ID, TIPO, DATA_E_ORA (
+    σ QUALIFICA = 'Caposala Area Critica' (
+        INFERMIERE ⨝ ASSISTE ⨝ INTERVENTO
+    )
+)

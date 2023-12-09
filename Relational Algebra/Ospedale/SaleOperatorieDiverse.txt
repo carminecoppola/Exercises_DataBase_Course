@@ -1,0 +1,6 @@
+-- Trova tutti gli infermieri (CF, NOME, COGNOME) che hanno assistito a interventi di almeno due diverse sale operatorie.
+
+π CF, NOME, COGNOME (
+σ COUNT(DISTINCT sala_op) > 1
+( PERSONA ⨝ INFERMIERE ⨝ ASSISTE ⨝ INTERVENTO)
+)

@@ -1,0 +1,8 @@
+-- Trova tutti gli studenti (SSN, Name) che hanno ottenuto una valutazione superiore a 80 in almeno due corsi nel semestre 'WiSe 2020'.
+
+π SSN,Name (
+		σ Quarter = 'WiSe 2020' ∧ Grade > 80 (
+				ENROLL ⨝ σ Quarter = 'WiSe 2020' ∧ Grade > 80 (ENROLL)
+		)
+		⨝ STUDENT
+)
