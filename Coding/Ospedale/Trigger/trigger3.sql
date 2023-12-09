@@ -1,92 +1,57 @@
-/*  Un medico può partecipare al massimo a 10 interventi in una settimana 
-    e di al più tre tipi diversi. In ogni intervento almeno due medici 
-    devono avere la stessa specializzazione.
+/*  
+	Un medico può partecipare al massimo a 10 interventi in una settimana, al più di tre 
+	tipi diversi. In ogni intervento almeno due medici devono avere la stessa specializzazione.
+		- MaxInterventi, MaxTipoInterventi, MinMediciSpecializ
 */
 
-CREATE OR REPLACE TRIGGER InterventiMedici 
-BEFORE INSERT ON INTERVENTO
-FOR EACH ROW
-DECLARE
-    totInterv   NUMBER;
-    tipoInterv  VARCHAR(30);
-    codfMedico  CHAR(16);
-    specializz  VARCHAR(50);
-BEGIN
-
-    SELECT  COUNT(*),COUNT(DISTINCT(I.tipo))
-    INTO    totInterv,tipoInterv
-    FROM    INTERVENTO I JOIN EFFETTUA E ON(I.id = E.id_int)
-    WHERE  	cf_med =:NEW.cf_med
-    GROUP BY M.cf;
-
-    IF(totInterv > 2)THEN
-        RAISE_APPLICATION_ERROR(-2001,'MaxInterventi: Attenzione questo medico ha effettuato gia 10 interventi');
-    END IF;
-
-    IF(tipoInterv > 3)THEN
-        RAISE_APPLICATION_ERROR(-2003,'MaxTipiInterventi: Attenzione questo medico ha effettuato gia 3 tipo di interventi diversi');
-    END IF;
-
-END;
-
-------------
-CREATE OR REPLACE TRIGGER InterventiMedici 
-BEFORE INSERT ON EFFETTUA
-FOR EACH ROW
-DECLARE
-    totInterv   NUMBER;
-    tipoInterv  VARCHAR(30);
-    codfMedico  CHAR(16);
-    specializz  VARCHAR(50);
-BEGIN
-
-    SELECT  COUNT(*)
-    INTO    totInterv
-    FROM    EFFETTUA
-    WHERE  	cf_med =:NEW.cf_med;
-
-    IF(totInterv > 6 )THEN
-        RAISE_APPLICATION_ERROR(-2001,'MaxInterventi: Attenzione questo medico ha effettuato gia 10 interventi');
-    END IF;
-
-END;
-
-
-
-/*  Un medico può partecipare al massimo a 10 interventi in una settimana e di al più tre tipi diversi. 
-	In ogni intervento almeno due medici devono avere la stessa specializzazione.
-		MaxInterventi, MaxTipoInterventi
-*/
-
-create or replace trigger controllomedici before insert on intervento
+create or replace trigger ControlloMedici 
+before insert on effettua
 for each row
 declare
+    num_int_sett        NUMBER;
+    num_int_distinti    NUMBER;
+    num_medici_stessa_specializzazione NUMBER;
 
-	num_int				number(2,0);
-    
-    MaxInterventi		EXCEPTION;
-	MaxTipoInterventi	EXCEPTION;
-    
+    MaxInterventi       EXCEPTION;
+    MaxTipoInterventi   EXCEPTION;
+    MinMediciSpecializ  EXCEPTION;
+
 begin
 
-	select 	count(i.id)
-    into	num_int
-    from	intervento i join
-                            ( select	e.cf_med
-                              from		effettua e
-                              where		e.cf_med =:NEW.cf_med
-                        	)subq on subq.id = i.id
-    where	i.id =:NEW.id and i.data_e_ora = sysdate - 7 ;
-    
+    -- Controlla il numero di interventi in una settimana e le tipologie
+    select  count(*), count(distinct i.tipo)
+    into    num_int_sett, num_int_distinti
+    from    effettua e 
+            join intervento i on e.id_int = i.id
+    where   e.id_int = :NEW.id_int and i.data_e_ora >= SYSDATE - 7;
 
-    IF MaxInterventi >= 10 THEN
-    	RAISE MaxInterventi;
+    IF num_int_sett > 9 THEN
+        RAISE MaxInterventi;
     END IF;
 
+    IF num_int_distinti > 2 THEN
+        RAISE MaxTipoInterventi;
+    END IF;
 
-	EXCEPTION
-        WHEN MaxInterventi THEN
-        	RAISE_ERROR_APPLICATION('-20001','MaxInterventi: questo medico ha gia effettuato 10 interventi');
-        
+    -- Controlla che ci siano almeno due medici con la stessa specializzazione nello stesso intervento
+    select  count(distinct m.cf)
+    into    num_medici_stessa_specializzazione
+    from    effettua e
+            join medico m on e.cf_med = m.cf
+    where   e.id_int = :NEW.id_int
+    group by m.specializzazione
+    having count(distinct m.cf) < 2;    -- Chi contiene meno di due medici con la stessa specializzazione
+
+    IF num_medici_stessa_specializzazione > 0 THEN  -- Quindi se c'è qualcuno che fa un intervento con meno di due medici da Errore
+        RAISE MinMediciSpecializ;
+    END IF;
+
+EXCEPTION
+    WHEN MaxInterventi THEN
+        RAISE_APPLICATION_ERROR('-20001', 'MaxInterventi');
+    WHEN MaxTipoInterventi THEN
+        RAISE_APPLICATION_ERROR('-20002', 'MaxTipoInterventi');
+    WHEN MinMediciSpecializ THEN
+        RAISE_APPLICATION_ERROR('-20003', 'MinMediciSpecializ');
 
 end;
