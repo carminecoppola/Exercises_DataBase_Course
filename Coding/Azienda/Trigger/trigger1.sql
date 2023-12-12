@@ -1,6 +1,7 @@
-/*  Un impiegato che lavora per più di 100 ore su un progetto non può essere assegnato ad un
+
+/*  Un impiegato che lavora per più di 200 ore su un progetto non può essere assegnato ad un
     secondo progetto. 
-    Se un impiegato lavora su due progetti per più di 100 ore totali, non può essere
+    Se un impiegato lavora su due progetti per più di 300 ore totali, non può essere
     assegnato ad un terzo.
     Un impiegato al massimo è assegnato a quattro progetti diversi.
     Eccezioni: 
@@ -8,29 +9,57 @@
 */
 
 
-CREATE OR REPLACE TRIGGER Controllo_Impiegato BEFORE INSERT ON LAVORA_SU
-FOR EACH ROW
-DECLARE
-	totOre	        NUMBER;
-    cont_progetti   NUMBER(2, 0);
-BEGIN
+create or replace trigger ControlloAzienda before insert on LAVORA_SU
+for each row
+declare
 
-    SELECT  COUNT(*)
-    INTO    cont_progetti
-    FROM    IMPIEGATO I JOIN LAVORA_SU LS ON(I.cf = LS.cf_impiegato)
-    WHERE   I.cf =:NEW.cf_impiegato;
+	sum_ore				 NUMBER;
+	num_progg_dist		 NUMBER;
+    tot_ore_progg		 NUMBER;
     
-    IF(cont_progetti > 4) THEN
-        RAISE_APPLICATION_ERROR(-20002,'Troppi_progetti: non puoi partecipare ad altri progetti');
-    END IF;
+    ore_progetto_sature  EXCEPTION;
+	ore_progetti_sature  EXCEPTION;
+	troppi_progetti 	 EXCEPTION;
 
+begin
+
+	select 	  DISTINCT SUM(l.ore)
+    into	  sum_ore
+    from	  impiegato i join lavora_su l on i.cf = l.cf_impiegato
+	where	  l.numero_progetto =:NEW.numero_progetto
+    group by  i.nome,l.numero_progetto;
+
+	IF sum_ore > 200 THEN
+        RAISE ore_progetto_sature;
+	END IF;
+
+
+	-- Piu di 2 progetti somma ore > 300
+	select 	count(DISTINCT l.numero_progetto), sum(l.ore)
+    into	num_progg_dist, tot_ore_progg
+    from	impiegato i join lavora_su l on i.cf = l.cf_impiegato
+    where	l.numero_progetto =:NEW.numero_progetto
+    group by i.nome;
+	
+
+	IF num_progg_dist > 1 AND tot_ore_progg > 300 THEN	
+        RAISE ore_progetti_sature;
+	END IF;
+
+
+	-- Un impiegato al massimo è assegnato a 4 progetti diversi
+
+	IF num_progg_dist > 4 THEN
+        RAISE troppi_progetti;
+	END IF;
     
-    SELECT  COUNT(LS.ore)
-    INTO    totOre
-    FROM    IMPIEGATO I JOIN LAVORA_SU LS ON(I.cf = LS.cf_impiegato)
-    WHERE   I.cf =:NEW.cf_impiegato;
 
-    IF(totOre > 100) THEN
-        RAISE_APPLICATION_ERROR(-20003,'Ore_progetto_sature: non può essere assegnato a un nuovo progetto');
-    END IF;
-END;
+    EXCEPTION
+    	WHEN ore_progetto_sature THEN
+    		RAISE_APPLICATION_ERROR('-20001','ore_progetto_sature:');
+		WHEN ore_progetti_sature THEN
+    		RAISE_APPLICATION_ERROR('-20002','ore_progetti_sature:');
+		WHEN troppi_progetti THEN
+    		RAISE_APPLICATION_ERROR('-20003','troppi_progetti:');
+
+end;
